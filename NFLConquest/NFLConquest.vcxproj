@@ -121,6 +121,12 @@ Copy /Y "$(SolutionDir)Contrib\SFML-2.4.2\bin\sfml-system-2.dll" "$(OutDir)sfml-
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Map\Subterritory.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Map\County.h" />
+    <ClInclude Include="Map\Subterritory.h" />
+    <ClInclude Include="Map\Territory.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

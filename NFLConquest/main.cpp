@@ -1,5 +1,7 @@
 #include "SFML\Graphics.hpp"
 
+#include "Map\Subterritory.h"
+
 sf::RenderWindow s_window(sf::VideoMode(1600, 900), "NFL Conquest");
 
 int main() 
@@ -15,5 +17,6 @@ int main()
 			}
 		}
 	}
+
 	return 0; 
 }
