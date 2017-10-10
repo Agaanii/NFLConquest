@@ -1,7 +1,9 @@
+#pragma once
+
 #include "SFML\Graphics.hpp"
 
 #include <memory>
-
+class Subterritory;
 using CountyId = long;
 struct County
 {
@@ -21,4 +23,5 @@ struct County
 	std::unique_ptr<sf::Sprite> m_sprite;
 	sf::Vector2f m_globalPosition;
 	CountyId m_countyId{ 0 };
+	Subterritory* m_owner;
 };

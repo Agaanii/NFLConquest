@@ -106,6 +106,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <AdditionalIncludeDirectories>$(SolutionDir)Contrib\SFML-2.4.2\include</AdditionalIncludeDirectories>
+      <AdditionalOptions>/std:c++latest %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -121,10 +122,14 @@ Copy /Y "$(SolutionDir)Contrib\SFML-2.4.2\bin\sfml-system-2.dll" "$(OutDir)sfml-
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Map\Map.cpp" />
     <ClCompile Include="Map\Subterritory.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Gameplay\Game.h" />
+    <ClInclude Include="Gameplay\Team.h" />
     <ClInclude Include="Map\County.h" />
+    <ClInclude Include="Map\Map.h" />
     <ClInclude Include="Map\Subterritory.h" />
     <ClInclude Include="Map\Territory.h" />
   </ItemGroup>

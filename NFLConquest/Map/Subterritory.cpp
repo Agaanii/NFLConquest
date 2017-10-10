@@ -5,9 +5,9 @@ bool Subterritory::ContainsCounty(const CountyId& countyId)
 	return m_counties.find(countyId) != m_counties.end();
 }
 
-bool Subterritory::TransferCounties(Subterritory& from, Subterritory& to, const std::vector<CountyId>& counties)
+bool Subterritory::TransferCounties(Subterritory& from, Subterritory& to, const std::vector<CountyId>& shiftingCounties, std::map<CountyId, County>& countyMap)
 {
-	for (auto&& county : counties)
+	for (auto&& county : shiftingCounties)
 	{
 		if (!from.ContainsCounty(county))
 		{
@@ -15,10 +15,11 @@ bool Subterritory::TransferCounties(Subterritory& from, Subterritory& to, const 
 		}
 	}
 
-	for (auto&& county : counties)
+	for (auto& county : shiftingCounties)
 	{
 		to.m_counties.emplace(county);
 		from.m_counties.erase(county);
+		countyMap[county].m_owner = &to;
 	}
 	return true;
 }
