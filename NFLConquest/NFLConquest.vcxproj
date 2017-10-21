@@ -83,7 +83,18 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
+      <AdditionalIncludeDirectories>$(SolutionDir)Contrib\SFML-2.4.2\include</AdditionalIncludeDirectories>
+      <AdditionalOptions>/std:c++latest %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(SolutionDir)Contrib\SFML-2.4.2\lib</AdditionalLibraryDirectories>
+      <AdditionalDependencies>sfml-graphics.lib;sfml-window.lib;sfml-system.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+    <PostBuildEvent>
+      <Command>Copy /Y "$(SolutionDir)Contrib\SFML-2.4.2\bin\sfml-graphics-2.dll" "$(OutDir)sfml-graphics-2.dll" &amp; 
+Copy /Y "$(SolutionDir)Contrib\SFML-2.4.2\bin\sfml-window-2.dll" "$(OutDir)sfml-window-2.dll" &amp; 
+Copy /Y "$(SolutionDir)Contrib\SFML-2.4.2\bin\sfml-system-2.dll" "$(OutDir)sfml-system-2.dll" &amp;</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -128,6 +139,7 @@ Copy /Y "$(SolutionDir)Contrib\SFML-2.4.2\bin\sfml-system-2.dll" "$(OutDir)sfml-
   <ItemGroup>
     <ClInclude Include="Gameplay\Game.h" />
     <ClInclude Include="Gameplay\Team.h" />
+    <ClInclude Include="main.h" />
     <ClInclude Include="Map\County.h" />
     <ClInclude Include="Map\Map.h" />
     <ClInclude Include="Map\Subterritory.h" />

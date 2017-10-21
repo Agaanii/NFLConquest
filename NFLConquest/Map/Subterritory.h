@@ -1,6 +1,7 @@
 #pragma once
 
 #include "County.h"
+#include "Map.h"
 
 #include <set>
 
@@ -17,7 +18,7 @@ public:
 	Territory* GetOwner() const { return m_owner; }
 	const std::set<CountyId>& GetCounties() const { return m_counties; }
 
-	static bool TransferCounties(Subterritory& from, Subterritory& to, const std::vector<CountyId>& shiftingCounties, std::map<CountyId, County>& countyMap);
+	static bool TransferCounties(Subterritory& from, Subterritory& to, const std::set<CountyId>& shiftingCounties, CountyMap& countyMap);
 private:
 	std::set<CountyId> m_counties;
 	Territory* m_owner;

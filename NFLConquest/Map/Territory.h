@@ -3,18 +3,34 @@
 #include "Subterritory.h"
 
 #include <optional>
-#include <stack>
 
 class Territory
 {
 public:
 	Territory() {}
-	Territory(const CountyId& homeCounty, const Subterritory& defaultHomeSubterritory)
+	Territory(const CountyId& homeCounty)
 		: m_homeCounty(homeCounty)
-		, m_defaultHomeSubterritory(defaultHomeSubterritory)
-		, m_currentHomeSubterritory(defaultHomeSubterritory)
+	{
+	}
+
+	Territory(const Territory& other)
+		: m_homeCounty(other.m_homeCounty)
+		, m_defaultHomeSubterritory(other.m_defaultHomeSubterritory)
+		, m_currentHomeSubterritory(other.m_currentHomeSubterritory)
+		, m_earnedTerritories(other.m_earnedTerritories)
 	{
 		m_defaultHomeSubterritory.SetOwner(this);
+		if (m_currentHomeSubterritory) m_currentHomeSubterritory->SetOwner(this);
+		for (auto&& sub : m_earnedTerritories)
+		{
+			sub.SetOwner(this);
+		}
+	}
+
+	void ClaimHome()
+	{
+		m_defaultHomeSubterritory.SetOwner(this);
+		if (m_currentHomeSubterritory) m_currentHomeSubterritory->SetOwner(this);
 	}
 
 	auto GetTerritoryCount() const { return m_earnedTerritories.size() + (m_currentHomeSubterritory.operator bool() ? 1 : 0); }
@@ -22,5 +38,5 @@ public:
 	CountyId m_homeCounty{ 0 };
 	Subterritory m_defaultHomeSubterritory;
 	std::optional<Subterritory> m_currentHomeSubterritory;
-	std::stack<Subterritory> m_earnedTerritories;
+	std::vector<Subterritory> m_earnedTerritories;
 };

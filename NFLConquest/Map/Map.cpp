@@ -6,7 +6,7 @@ void CountyMap::AddCounty(County&& county, std::set<CountyId> adjacentCounties)
 	m_edges[county.m_countyId] = adjacentCounties;
 }
 
-const County& CountyMap::FindCounty(const CountyId& county)
+County& CountyMap::FindCounty(const CountyId& county)
 {
 	return m_counties[county];
 }

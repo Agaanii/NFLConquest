@@ -1,12 +1,14 @@
 #include "Subterritory.h"
 
+extern CountyMap counties;
 bool Subterritory::ContainsCounty(const CountyId& countyId)
 {
 	return m_counties.find(countyId) != m_counties.end();
 }
 
-bool Subterritory::TransferCounties(Subterritory& from, Subterritory& to, const std::vector<CountyId>& shiftingCounties, std::map<CountyId, County>& countyMap)
+bool Subterritory::TransferCounties(Subterritory& from, Subterritory& to, const std::set<CountyId>& shiftingCounties, CountyMap& countyMap)
 {
+	if (&from == &to) return true;
 	for (auto&& county : shiftingCounties)
 	{
 		if (!from.ContainsCounty(county))
@@ -19,7 +21,7 @@ bool Subterritory::TransferCounties(Subterritory& from, Subterritory& to, const 
 	{
 		to.m_counties.emplace(county);
 		from.m_counties.erase(county);
-		countyMap[county].m_owner = &to;
+		countyMap.FindCounty(county).m_owner = &to;
 	}
 	return true;
 }
@@ -27,4 +29,5 @@ bool Subterritory::TransferCounties(Subterritory& from, Subterritory& to, const 
 void Subterritory::AddCounty(const CountyId& county)
 {
 	m_counties.insert(county);
+	counties.FindCounty(county).m_owner = this;
 }

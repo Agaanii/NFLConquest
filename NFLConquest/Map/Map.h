@@ -1,3 +1,5 @@
+#pragma once
+
 #include "County.h"
 
 #include <map>
@@ -7,7 +9,7 @@ class CountyMap
 {
 public:
 	void AddCounty(County&& county, std::set<CountyId> adjacentCounties);
-	const County& FindCounty(const CountyId& county);
+	County& FindCounty(const CountyId& county);
 	std::set<CountyId> GetAdjacents(const CountyId& countyId) const;
 private:
 	using Counties = std::map<CountyId, County>;
