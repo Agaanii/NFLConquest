@@ -17,6 +17,13 @@ public:
 	}
 	Territory* GetOwner() const { return m_owner; }
 	const std::set<CountyId>& GetCounties() const { return m_counties; }
+	void ClaimCounties(CountyMap& countyMap)
+	{
+		for (auto&& county : m_counties)
+		{
+			countyMap.FindCounty(county).m_owner = this;
+		}
+	}
 
 	static bool TransferCounties(Subterritory& from, Subterritory& to, const std::set<CountyId>& shiftingCounties, CountyMap& countyMap);
 private:

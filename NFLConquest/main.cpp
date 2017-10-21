@@ -12,13 +12,13 @@
 sf::RenderWindow s_window(sf::VideoMode(1600, 900), "NFL Conquest");
 
 CountyMap counties;
+std::map<CountyId, TeamId> homeCounties;
 int main()
 {
 	for (CountyId c = 1; c < 321; ++c)
 	{
 		counties.AddCounty(County(nullptr, { 0,0 }, c), { (c < 321) ? c + 1 : c - 1, (c > 1) ? c - 1 : c + 1 });
 	}
-	std::set<CountyId> homeCounties;
 
 	std::vector<sf::Color> teamColors = 
 	{
@@ -67,7 +67,7 @@ int main()
 	for (TeamId t = 1; t < 33; ++t)
 	{
 		CountyId homeCounty = 10 * t - 5;
-		homeCounties.insert(homeCounty);
+		homeCounties[homeCounty] = t;
 		teams.emplace(t, Team(t, Territory(homeCounty)));
 		teamIds.push_back(t);
 		auto&& team = teams[t];
@@ -80,6 +80,7 @@ int main()
 			team.m_territory.m_defaultHomeSubterritory.AddCounty(countyId);
 			team.m_territory.m_currentHomeSubterritory->AddCounty(countyId);
 		}
+		team.m_territory.m_currentHomeSubterritory->ClaimCounties(counties);
 	}
 
 	std::map<TeamId, Territory> startPositions = CacheTerritories(teams);
@@ -107,7 +108,25 @@ int main()
 
 	std::cout << "-----------------------------------------" << std::endl;
 	auto PIXEL_SIZE = 5;
-	auto yPos = 0;
+	auto yPos = 1;
+	for (auto& territory : startPositions)
+	{
+		auto&& team = teams[territory.first];
+		if (territory.second.m_currentHomeSubterritory)
+		{
+			for (auto&& county : territory.second.m_currentHomeSubterritory->GetCounties())
+			{
+				drawCounty(PIXEL_SIZE, team, county, 0);
+			}
+		}
+		for (auto&& sub : territory.second.m_earnedTerritories)
+		{
+			for (auto&& county : sub.GetCounties())
+			{
+				drawCounty(PIXEL_SIZE, team, county, 0);
+			}
+		}
+	}
 	for (auto&& week : season)
 	{
 		for (auto& game : week.m_games)
@@ -123,7 +142,7 @@ int main()
 				game.m_result = Game::Result::TIE;
 			}
 			std::cout << game.m_awayTeam << " @ " << game.m_homeTeam << ": " << static_cast<int>(game.m_result) << std::endl;
-			ProcessGameResult(game, teams, counties, homeCounties);
+			ProcessGameResult(game, teams, counties);
 		}
 		week.m_cachedTerritories = CacheTerritories(teams);
 		for (auto& territory : week.m_cachedTerritories)
@@ -182,7 +201,7 @@ std::map<TeamId, Territory> CacheTerritories(std::map<TeamId, Team> &teams)
 	return positions;
 }
 
-void ProcessGameResult(Game &game, std::map<TeamId, Team>& teams, CountyMap &counties, std::set<CountyId> &homeCounties)
+void ProcessGameResult(Game &game, std::map<TeamId, Team>& teams, CountyMap &counties)
 {
 	auto&& homeTeam = teams[game.m_homeTeam];
 	auto&& awayTeam = teams[game.m_awayTeam];
@@ -193,7 +212,7 @@ void ProcessGameResult(Game &game, std::map<TeamId, Team>& teams, CountyMap &cou
 		// No territory change
 		break;
 	case Game::Result::HOME_WIN:
-		ProcessHomeWin(homeTeam, counties, homeCounties);
+		ProcessHomeWin(homeTeam, counties);
 		break;
 	case Game::Result::AWAY_WIN:
 		ProcessAwayWin(homeTeam, awayTeam);
@@ -217,19 +236,23 @@ void ProcessAwayWin(Team & homeTeam, Team & awayTeam)
 		if (homeTeam.m_territory.m_earnedTerritories.size())
 		{
 			awayTeam.m_territory.m_earnedTerritories.push_back(homeTeam.m_territory.m_earnedTerritories.back());
-			awayTeam.m_territory.m_earnedTerritories.back().SetOwner(&awayTeam.m_territory);
+			awayTeam.m_territory.ClaimTerritories(counties);
 			homeTeam.m_territory.m_earnedTerritories.pop_back();
+			counties.Validate();
+			std::cout << "";
 		}
 		else
 		{
 			awayTeam.m_territory.m_earnedTerritories.push_back(*homeTeam.m_territory.m_currentHomeSubterritory);
-			awayTeam.m_territory.m_earnedTerritories.back().SetOwner(&awayTeam.m_territory);
+			awayTeam.m_territory.ClaimTerritories(counties);
 			homeTeam.m_territory.m_currentHomeSubterritory.reset();
+			counties.Validate();
+			std::cout << "";
 		}
 	}
 }
 
-void ProcessHomeWin(Team & homeTeam, CountyMap & counties, const std::set<CountyId>& homeCounties)
+void ProcessHomeWin(Team & homeTeam, CountyMap & counties)
 {
 	// Home team keeps all current territory
 	// If home team has none of its original territory, reclaim stadium and one ring of counties around it
@@ -253,7 +276,8 @@ void ProcessHomeWin(Team & homeTeam, CountyMap & counties, const std::set<County
 				{
 					continue;
 				}
-				if (homeCounties.count(adjacent))
+				auto homeCountyIter = homeCounties.find(adjacent);
+				if (homeCountyIter != homeCounties.end() && homeCountyIter->second != homeTeam.m_teamId)
 				{
 					// This is a home county of another team. Don't subsume it
 					continue;
@@ -274,14 +298,16 @@ void ProcessHomeWin(Team & homeTeam, CountyMap & counties, const std::set<County
 				// Not part of the home territory, and we're not allowing expansion beyond home
 				continue;
 			}
-			if (homeCounties.count(adjacent))
+			auto homeCountyIter = homeCounties.find(adjacent);
+			if (homeCountyIter != homeCounties.end() && homeCountyIter->second != homeTeam.m_teamId)
 			{
 				// This is a home county of another team. Don't subsume it
 				continue;
 			}
 			countiesToClaim.insert(adjacent);
 		}
-		homeTeam.m_territory.m_currentHomeSubterritory = {};
+		homeTeam.m_territory.m_currentHomeSubterritory = Subterritory{};
+		homeTeam.m_territory.m_currentHomeSubterritory->SetOwner(&homeTeam.m_territory);
 	}
 
 	// Find all subterritories that contain any county we're claiming
@@ -291,10 +317,6 @@ void ProcessHomeWin(Team & homeTeam, CountyMap & counties, const std::set<County
 	for (auto&& county : countiesToClaim)
 	{
 		auto& countyObj = counties.FindCounty(county);
-		if (countyObj.m_owner->GetOwner()->m_homeCounty == county)
-		{
-			continue;
-		}
 		sourceSubterritories[countyObj.m_owner].insert(county);
 	}
 	for (auto&& subterritory : sourceSubterritories)

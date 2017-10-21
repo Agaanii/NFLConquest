@@ -19,15 +19,15 @@ bool Subterritory::TransferCounties(Subterritory& from, Subterritory& to, const 
 
 	for (auto& county : shiftingCounties)
 	{
-		to.m_counties.emplace(county);
+		to.m_counties.insert(county);
 		from.m_counties.erase(county);
 		countyMap.FindCounty(county).m_owner = &to;
 	}
+	to.ClaimCounties(countyMap);
 	return true;
 }
 
 void Subterritory::AddCounty(const CountyId& county)
 {
 	m_counties.insert(county);
-	counties.FindCounty(county).m_owner = this;
 }
