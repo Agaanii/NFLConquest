@@ -17,7 +17,10 @@ int main()
 {
 	for (CountyId c = 1; c < 321; ++c)
 	{
-		counties.AddCounty(County(nullptr, { 0,0 }, c), { (c < 321) ? c + 1 : c - 1, (c > 1) ? c - 1 : c + 1 });
+		std::set<CountyId> adjacents;
+		if (c - 1 > 0) adjacents.insert(c - 1);
+		if (c + 1 < 321) adjacents.insert(c + 1);
+		counties.AddCounty(County(nullptr, { 0,0 }, c), adjacents);
 	}
 
 	std::vector<sf::Color> teamColors = 
@@ -258,7 +261,7 @@ void ProcessHomeWin(Team & homeTeam, CountyMap & counties)
 	// If home team has none of its original territory, reclaim stadium and one ring of counties around it
 	// If home team has its home stadium as territory, expand out one ring, limited by initial home territory
 	// Optional: Allow expansion past initial home territory, excluding any other team's home stadium
-	bool allowHomeExpansion = false;
+	bool allowHomeExpansion = true;
 	std::set<CountyId> countiesToClaim;
 	if (homeTeam.m_territory.m_currentHomeSubterritory)
 	{
@@ -269,8 +272,11 @@ void ProcessHomeWin(Team & homeTeam, CountyMap & counties)
 			{
 				if (!homeTeam.m_territory.m_defaultHomeSubterritory.ContainsCounty(adjacent))
 				{
-					// Not part of the home territory, and we're not allowing expansion beyond home
-					continue;
+					if (!allowHomeExpansion)
+					{
+						// Not part of the home territory, and we're not allowing expansion beyond home
+						continue;
+					}
 				}
 				if (homeTeam.m_territory.m_currentHomeSubterritory->ContainsCounty(adjacent))
 				{
